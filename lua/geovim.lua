@@ -66,7 +66,10 @@ local function update_view(file)
 
   local result = vim.fn.systemlist('gdalinfo ' ..file)
   
-  if #result == 0 then table.insert(result, '') end -- add  an empty line to preserve layout if there is no results
+  if vim.v.shell_error ~= 0 then
+    result = {"Error opening file, likely not a supported filetype"}
+  end
+
   for k,v in pairs(result) do
     result[k] = '  '..result[k]
   end
