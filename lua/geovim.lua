@@ -61,19 +61,17 @@ local function open_window()
   api.nvim_buf_add_highlight(buf, -1, 'GeovimHeader', 0, 0, -1)
 end
 
-local function update_view(direction)
+local function update_view(file)
   api.nvim_buf_set_option(buf, 'modifiable', true)
-  position = position + direction
-  if position < 0 then position = 0 end
 
-  local result = vim.fn.systemlist('git diff-tree --no-commit-id --name-only -r  HEAD~'..position)
+  local result = vim.fn.systemlist('gdalinfo ' ..file)
   
   if #result == 0 then table.insert(result, '') end -- add  an empty line to preserve layout if there is no results
   for k,v in pairs(result) do
     result[k] = '  '..result[k]
   end
 
-  api.nvim_buf_set_lines(buf, 1, 2, false, {center('HEAD~'..position)})
+  api.nvim_buf_set_lines(buf, 1, 2, false, {center(file)})
   api.nvim_buf_set_lines(buf, 3, -1, false, result)
 
   api.nvim_buf_add_highlight(buf, -1, 'geovimSubHeader', 1, 0, -1)
@@ -97,13 +95,7 @@ end
 
 local function set_mappings()
   local mappings = {
-    ['['] = 'update_view(-1)',
-    [']'] = 'update_view(1)',
-    ['<cr>'] = 'open_file()',
-    h = 'update_view(-1)',
-    l = 'update_view(1)',
     q = 'close_window()',
-    k = 'move_cursor()'
   }
 
   for k,v in pairs(mappings) do
@@ -121,11 +113,13 @@ local function set_mappings()
   end
 end
 
+
 local function geovim()
-  position = 0
+  local cbuf = api.nvim_get_current_buf()
+  local file = api.nvim_buf_get_name(cbuf)
   open_window()
   set_mappings()
-  update_view(0)
+  update_view(file)
   api.nvim_win_set_cursor(win, {4, 0})
 end
 
