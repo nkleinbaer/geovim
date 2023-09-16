@@ -116,10 +116,19 @@ local function set_mappings()
   end
 end
 
+local function get_file()
+  local file
+  if (api.nvim_buf_get_option(0, "filetype")=="netrw") then
+    file = api.nvim_get_current_line()
+  else
+    local cbuf = api.nvim_get_current_buf()
+    file = api.nvim_buf_get_name(cbuf)
+  end
+  return file
+end
 
 local function geovim()
-  local cbuf = api.nvim_get_current_buf()
-  local file = api.nvim_buf_get_name(cbuf)
+  local file = get_file()
   open_window()
   set_mappings()
   update_view(file)
